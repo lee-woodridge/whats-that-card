@@ -46,7 +46,8 @@ const (
 	hearthstoneAPI  = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
 	cloudinaryURL   = "https://api.cloudinary.com/v1_1/elusive/image/upload"
 	elasticURL      = "http://localhost:9200"
-	mappingFilename = "mapping.json"
+	mappingFilename = "./mapping.json"
+	cardsFilename   = "./cards.json"
 )
 
 func getCardsFromAPI() ([]byte, error) {
@@ -104,14 +105,25 @@ func uploadImageToCloudinary(card Card) error {
 }
 
 func createCardsIndex() error {
+	// Setup http client.
+	client := &http.Client{}
+
+	// Delete if already exists.
+	req, err := http.NewRequest("DELETE", elasticURL+"/hs", nil)
+	if err != nil {
+		return err
+	}
+	_, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
 	file, e := ioutil.ReadFile(mappingFilename)
 	if e != nil {
 		return e
 	}
-	// Setup http client.
-	client := &http.Client{}
 	buf := bytes.NewBuffer(file)
-	req, err := http.NewRequest("PUT", elasticURL+"/hs", buf)
+	req, err = http.NewRequest("PUT", elasticURL+"/hs", buf)
 	if err != nil {
 		return err
 	}
@@ -139,7 +151,7 @@ func insertCardToElastic(card Card) error {
 }
 
 func main() {
-	file, e := ioutil.ReadFile("./cards.json")
+	file, e := ioutil.ReadFile(cardsFilename)
 	// file, e := getCardsFromAPI()
 	if e != nil {
 		fmt.Printf("File error: %v\n", e)
@@ -147,6 +159,9 @@ func main() {
 	}
 	var cards map[string][]Card
 	json.Unmarshal(file, &cards)
+	if err := createCardsIndex(); err != nil {
+		fmt.Errorf("%s\n", err)
+	}
 
 	for _, val := range cards {
 		for _, card := range val {

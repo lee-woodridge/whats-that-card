@@ -3,19 +3,17 @@
     "cards": {
       "properties": {
         "Artist": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Attack": {
           "type": "long"
         },
         "CardId": {
           "type": "string",
-          "analyzer": "english"
+          "index": "not_analyzed"
         },
         "CardSet": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Collectible": {
           "type": "boolean"
@@ -30,8 +28,7 @@
           "type": "boolean"
         },
         "Faction": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Flavor": {
           "type": "string",
@@ -50,11 +47,11 @@
         },
         "Img": {
           "type": "string",
-          "analyzer": "english"
+          "index": "not_analyzed"
         },
         "ImgGold": {
           "type": "string",
-          "analyzer": "english"
+          "index": "not_analyzed"
         },
         "InPlayText": {
           "type": "string",
@@ -62,43 +59,33 @@
         },
         "Locale": {
           "type": "string",
-          "analyzer": "english"
+          "index": "not_analyzed"
         },
         "Mechanics": {
           "properties": {
             "Name": {
-              "type": "string",
-              "analyzer": "english"
+              "type": "string"
             }
           }
         },
         "Name": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "PlayerClass": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Race": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Rarity": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         },
         "Text": {
           "type": "string",
           "analyzer": "english"
         },
         "Type": {
-          "type": "string",
-          "analyzer": "english"
-        },
-        "name": {
-          "type": "string",
-          "analyzer": "english"
+          "type": "string"
         }
       }
     }
