@@ -43,10 +43,10 @@ type Card struct {
 }
 
 const (
-	hearthstoneAPI = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
-	cloudinaryURL  = "https://api.cloudinary.com/v1_1/elusive/image/upload"
-	elasticURL     = "http://localhost:9200"
-	elastic        = false
+	hearthstoneAPI  = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
+	cloudinaryURL   = "https://api.cloudinary.com/v1_1/elusive/image/upload"
+	elasticURL      = "http://localhost:9200"
+	mappingFilename = "mapping.json"
 )
 
 func getCardsFromAPI() ([]byte, error) {
@@ -103,6 +103,22 @@ func uploadImageToCloudinary(card Card) error {
 	return err
 }
 
+func createCardsIndex() error {
+	file, e := ioutil.ReadFile(mappingFilename)
+	if e != nil {
+		return e
+	}
+	// Setup http client.
+	client := &http.Client{}
+	buf := bytes.NewBuffer(file)
+	req, err := http.NewRequest("PUT", elasticURL+"/hs", buf)
+	if err != nil {
+		return err
+	}
+	_, err = client.Do(req)
+	return err
+}
+
 func insertCardToElastic(card Card) error {
 	// Setup http client.
 	client := &http.Client{}
@@ -113,11 +129,12 @@ func insertCardToElastic(card Card) error {
 	}
 	buf := bytes.NewBuffer(b)
 	// Submit PUT to elastic using the cardId as unique key.
-	req, err := http.NewRequest("PUT", elasticURL+"/cards/external/"+card.CardId, buf)
+	req, err := http.NewRequest("PUT", elasticURL+"/hs/cards/"+card.CardId, buf)
 	if err != nil {
 		return err
 	}
 	_, err = client.Do(req)
+	// fmt.Printf("put %s with resp %s", elasticURL+"/hs/cards/external/"+card.CardId, res)
 	return err
 }
 

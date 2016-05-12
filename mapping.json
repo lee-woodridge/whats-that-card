@@ -1,0 +1,106 @@
+{
+  "mappings": {
+    "cards": {
+      "properties": {
+        "Artist": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Attack": {
+          "type": "long"
+        },
+        "CardId": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "CardSet": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Collectible": {
+          "type": "boolean"
+        },
+        "Cost": {
+          "type": "long"
+        },
+        "Durability": {
+          "type": "long"
+        },
+        "Elite": {
+          "type": "boolean"
+        },
+        "Faction": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Flavor": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Health": {
+          "type": "long"
+        },
+        "HowToGet": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "HowToGetGold": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Img": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "ImgGold": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "InPlayText": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Locale": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Mechanics": {
+          "properties": {
+            "Name": {
+              "type": "string",
+              "analyzer": "english"
+            }
+          }
+        },
+        "Name": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "PlayerClass": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Race": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Rarity": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Text": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "Type": {
+          "type": "string",
+          "analyzer": "english"
+        },
+        "name": {
+          "type": "string",
+          "analyzer": "english"
+        }
+      }
+    }
+  }
+}
