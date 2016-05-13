@@ -3,7 +3,8 @@
     "cards": {
       "properties": {
         "Artist": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Attack": {
           "type": "long"
@@ -13,7 +14,8 @@
           "index": "not_analyzed"
         },
         "CardSet": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Collectible": {
           "type": "boolean"
@@ -28,22 +30,26 @@
           "type": "boolean"
         },
         "Faction": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Flavor": {
           "type": "string",
-          "analyzer": "english"
+          "analyzer": "english",
+          "term_vector": "with_positions_offsets"
         },
         "Health": {
           "type": "long"
         },
         "HowToGet": {
           "type": "string",
-          "analyzer": "english"
+          "analyzer": "english",
+          "term_vector": "with_positions_offsets"
         },
         "HowToGetGold": {
           "type": "string",
-          "analyzer": "english"
+          "analyzer": "english",
+          "term_vector": "with_positions_offsets"
         },
         "Img": {
           "type": "string",
@@ -55,7 +61,8 @@
         },
         "InPlayText": {
           "type": "string",
-          "analyzer": "english"
+          "analyzer": "english",
+          "term_vector": "with_positions_offsets"
         },
         "Locale": {
           "type": "string",
@@ -64,28 +71,35 @@
         "Mechanics": {
           "properties": {
             "Name": {
-              "type": "string"
+              "type": "string",
+              "index": "not_analyzed"
             }
           }
         },
         "Name": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "PlayerClass": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Race": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Rarity": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         },
         "Text": {
           "type": "string",
-          "analyzer": "english"
+          "analyzer": "english",
+          "term_vector": "with_positions_offsets"
         },
         "Type": {
-          "type": "string"
+          "type": "string",
+          "term_vector": "with_positions_offsets"
         }
       }
     }
