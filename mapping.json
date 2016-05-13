@@ -4,7 +4,8 @@
       "properties": {
         "Artist": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Attack": {
           "type": "long"
@@ -15,7 +16,8 @@
         },
         "CardSet": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Collectible": {
           "type": "boolean"
@@ -31,12 +33,14 @@
         },
         "Faction": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Flavor": {
           "type": "string",
           "analyzer": "english",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Health": {
           "type": "long"
@@ -44,12 +48,14 @@
         "HowToGet": {
           "type": "string",
           "analyzer": "english",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "HowToGetGold": {
           "type": "string",
           "analyzer": "english",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Img": {
           "type": "string",
@@ -62,7 +68,8 @@
         "InPlayText": {
           "type": "string",
           "analyzer": "english",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Locale": {
           "type": "string",
@@ -78,28 +85,34 @@
         },
         "Name": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "PlayerClass": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Race": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Rarity": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Text": {
           "type": "string",
           "analyzer": "english",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         },
         "Type": {
           "type": "string",
-          "term_vector": "with_positions_offsets"
+          "term_vector": "with_positions_offsets",
+          "index_options": "positions"
         }
       }
     }
