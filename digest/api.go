@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	cardsFilename  = "./cards.json"
 	hearthstoneAPI = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
 )
 
@@ -36,18 +35,6 @@ func GetCardsFromAPI() (CardSets, error) {
 	}
 	var cards CardSets
 	if err := json.Unmarshal(bytes, &cards); err != nil {
-		return nil, err
-	}
-	return cards, nil
-}
-
-func GetCardsFromFile() (CardSets, error) {
-	file, e := ioutil.ReadFile(cardsFilename)
-	if e != nil {
-		return nil, e
-	}
-	var cards map[string][]Card
-	if err := json.Unmarshal(file, &cards); err != nil {
 		return nil, err
 	}
 	return cards, nil
