@@ -9,5 +9,5 @@ import (
 func TestGetCardsFromFile(t *testing.T) {
 	cards, err := GetCardsFromFile("../cards.json")
 	assert.Nil(t, err)
-	assert.Equal(t, "AFK", cards["Basic"][0].Name, "First basic card should be AFK")
+	assert.Equal(t, "AFK", cards[0].Name, "First basic card should be AFK")
 }

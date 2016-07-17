@@ -1,7 +1,7 @@
 package digest
 
 import (
-	. "github.com/lee-woodridge/whats-that-card/types"
+	. "github.com/lee-woodridge/whats-that-card/card"
 
 	"encoding/json"
 	"io/ioutil"
@@ -12,7 +12,7 @@ const (
 	hearthstoneAPI = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
 )
 
-func GetCardsFromAPI() (CardSets, error) {
+func GetCardsFromAPI() (Cards, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", hearthstoneAPI, nil)
 	if err != nil {
@@ -33,9 +33,10 @@ func GetCardsFromAPI() (CardSets, error) {
 	if err != nil {
 		return nil, err
 	}
-	var cards CardSets
-	if err := json.Unmarshal(bytes, &cards); err != nil {
+	var cs CardSets
+	if err := json.Unmarshal(bytes, &cs); err != nil {
 		return nil, err
 	}
+	cards := cs.AllCards()
 	return cards, nil
 }

@@ -1,7 +1,7 @@
 package upload
 
 import (
-	. "github.com/lee-woodridge/whats-that-card/types"
+	. "github.com/lee-woodridge/whats-that-card/card"
 
 	"bytes"
 	"encoding/json"
