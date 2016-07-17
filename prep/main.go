@@ -1,8 +1,6 @@
 package prep
 
 import (
-	"github.com/derekparker/trie"
-
 	. "github.com/lee-woodridge/whats-that-card/card"
 )
 
