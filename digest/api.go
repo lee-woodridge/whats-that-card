@@ -12,6 +12,8 @@ const (
 	hearthstoneAPI = "https://omgvamp-hearthstone-v1.p.mashape.com/cards"
 )
 
+// GetCardsFromFile gets the card information from the mashape hearthstone API
+// and marshals it into our card struct.
 func GetCardsFromAPI() (Cards, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", hearthstoneAPI, nil)

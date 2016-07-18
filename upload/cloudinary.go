@@ -15,6 +15,8 @@ const (
 	cloudinaryURL = "https://api.cloudinary.com/v1_1/elusive/image/upload"
 )
 
+// UploadImageToCloudinary takes a cards image link from the hearthstone API
+// and creates a copy hosted on my cloudinary account.
 func UploadImageToCloudinary(card Card) error {
 	if card.Img == "" {
 		return nil

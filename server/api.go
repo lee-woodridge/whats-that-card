@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+// StartServer is the top level function for creating our card service.
+
+// It pre-processes the card information such as setting up Tries for querying,
+// then starts handling requests on the PORT environment variable.
 func StartServer(cards Cards) {
 	// Do pre-processing of the cards.
 	// searchInfo := prep.CardInfoPrep(cards)
@@ -24,6 +28,8 @@ func StartServer(cards Cards) {
 	http.ListenAndServe(":"+port, nil)
 }
 
+// getCard is the function which handles the /card/ endpoint.
+// It returns the card information for the card ID given.
 func getCard(cards Cards) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cardId := strings.SplitN(r.URL.Path, "/", 3)[2]

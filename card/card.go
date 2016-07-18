@@ -5,13 +5,18 @@ import (
 	"sort"
 )
 
+// CardSets is the format of the cards we get from the API.
 type CardSets map[string][]Card
+
+// Cards is just an array of Card structs.
 type Cards []Card
 
 type Mechanic struct {
 	Name string
 }
 
+// Card is the core struct of the card service. It holds all the information
+// for a specific card in the game.
 type Card struct {
 	Mechanics    []Mechanic // needs it's own type [{"name": "Charge"},{"name": "Divine Shield"}]
 	Durability   int
@@ -39,7 +44,8 @@ type Card struct {
 	CardId       string
 }
 
-// Ugly code to loop over the map in alphabetical order.
+// AllCards takes the map format we get from the API and returns a simple array
+// of all the cards. Sorts the keys to ensure we get deterministic loop ordering.
 func (cs CardSets) AllCards() []Card {
 	keys := []string{}
 	for k, _ := range cs {
@@ -56,6 +62,8 @@ func (cs CardSets) AllCards() []Card {
 	return all
 }
 
+// GetAllStrings returns all of the strings from the card struct.
+// Uses reflection so will work even if the card struct changes.
 func (c Card) GetAllStrings() []string {
 	v := reflect.ValueOf(c)
 	allStrings := []string{}

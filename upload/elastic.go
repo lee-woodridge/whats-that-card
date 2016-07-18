@@ -14,6 +14,8 @@ const (
 	mappingFilename = "./mapping.json"
 )
 
+// createCardsIndex sets up the correct ElasticSearch indexes to quickly
+// perform the text searches I want to do on the card data.
 func createCardsIndex() error {
 	// Setup http client.
 	client := &http.Client{}
@@ -57,6 +59,7 @@ func insertCardToElastic(client *http.Client, card Card) error {
 	return err
 }
 
+// InsertCardsToElastic uploads the cards from the API into my ElasticSearch instance.
 func InsertCardsToElastic(cards map[string][]Card) error {
 	// Setup indexes to insert the cards first.
 	if err := createCardsIndex(); err != nil {
