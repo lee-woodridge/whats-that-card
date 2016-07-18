@@ -11,7 +11,7 @@ import (
 )
 
 // StartServer is the top level function for creating our card service.
-
+//
 // It pre-processes the card information such as setting up Tries for querying,
 // then starts handling requests on the PORT environment variable.
 func StartServer(cards Cards) {

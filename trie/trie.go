@@ -1,11 +1,11 @@
 // trie is a package created solely for use in text based searching
 // of a static set of strings. For this reason, there is no option
 // for removal or editing once the keys are inserted.
-
+//
 // I chose this approach using other trie libraries as they didn't
 // keep multiples of metadata for duplicate keys, choosing rather to
 // overwrite. In my case I require that these be kept.
-
+//
 // For example, in my hearthstone card searching application, the
 // key "fire" may be used may times over, and I will want to retrieve
 // all cards with this word rather than the most recent insert.
@@ -92,9 +92,9 @@ func (t *Trie) FindLeaf(key string) *Node {
 // PrefixSearch finds all nodes which are a child of the node which
 // is the prefix. We return this as a map from the word up to the node
 // to that node.
-
+//
 // For example: if we insert ("hi", 0) and ("hire", 1), we'll get back
-// map[string]*Node{"hi": 0, "hire": 1}
+// map[string]*Node{"hi": interface{0}, "hire": interface{1}}
 func (t *Trie) PrefixSearch(prefix string) map[string][]interface{} {
 	res := make(map[string][]interface{})
 	// First, we need to find the node which represents the prefix.
