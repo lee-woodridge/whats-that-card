@@ -29,6 +29,10 @@ type Node struct {
 	infos    []interface{}
 }
 
+//
+// Trie functions.
+//
+
 // New returns a new empty Trie.
 func New() *Trie {
 	return &Trie{
@@ -107,6 +111,70 @@ func (t *Trie) PrefixSearch(prefix string) map[string][]interface{} {
 	return res
 }
 
+// FuzzySearch performs a search for any nodes which represent a word which has
+// a Levenshtein distance less than maxCost.
+func (t *Trie) FuzzySearch(word string, maxCost int) map[string][]interface{} {
+	res := make(map[string][]interface{})
+	currentRow := make([]int, len(word)+1)
+	for i, _ := range currentRow {
+		currentRow[i] = i
+	}
+	for _, child := range t.root.children {
+		child.fuzzyRecursive([]rune(word), []rune(""), currentRow, res, maxCost)
+	}
+	return res
+}
+
+// min is a basic min function for two ints, returning the smaller value.
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}
+
+// fuzzyRecursive is the recursive function used by FuzzySearch, for recursing
+// through the tree nodes. Accumulates the result in the res map.
+func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
+	res map[string][]interface{}, maxCost int) {
+	columns := len(word) + 1
+	currentRow := []int{prevRow[0] + 1}
+	for i := 1; i < columns; i++ {
+		insertCost := currentRow[i-1] + 1
+		deleteCost := prevRow[i] + 1
+
+		var replaceCost int
+		if word[i-1] != n.r {
+			replaceCost = prevRow[i-1] + 1
+		} else {
+			replaceCost = prevRow[i-1]
+		}
+
+		currentRow = append(currentRow, min(min(insertCost, deleteCost), replaceCost))
+	}
+
+	if currentRow[len(currentRow)-1] <= maxCost && n.hasInfo() {
+		res[string(append(prefix, n.r))] = n.infos
+	}
+
+	min := currentRow[0]
+	for _, val := range currentRow {
+		if val < min {
+			min = val
+		}
+	}
+	if min <= maxCost {
+		for _, child := range n.children {
+			child.fuzzyRecursive(word, append(prefix, n.r), currentRow, res, maxCost)
+		}
+	}
+}
+
+//
+// Node functions.
+//
+
 func (n *Node) collect(prefix string, res map[string][]interface{}) {
 	res[prefix] = n.infos
 	for r, n := range n.children {
@@ -130,6 +198,12 @@ func (n *Node) addChild(r rune) *Node {
 	}
 	n.children[r] = child
 	return child
+}
+
+// hasInfo returns whether the current node has information or not. This is relevent
+// as nodes which have info are nodes where a string terminated.
+func (n *Node) hasInfo() bool {
+	return len(n.infos) > 0
 }
 
 // isLeaf returns whether the current node is a leaf or not, by checking if
