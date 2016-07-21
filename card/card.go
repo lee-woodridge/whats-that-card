@@ -3,6 +3,7 @@ package card
 import (
 	"reflect"
 	"sort"
+	"strings"
 )
 
 // CardSets is the format of the cards we get from the API.
@@ -70,7 +71,8 @@ func (c Card) GetAllStrings() []string {
 	for i := 0; i < v.NumField(); i++ {
 		switch s := v.Field(i).Interface().(type) {
 		case string:
-			allStrings = append(allStrings, s)
+			split := strings.Split(s, " ")
+			allStrings = append(allStrings, split...)
 		}
 	}
 	return allStrings
