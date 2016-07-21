@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/lee-woodridge/whats-that-card/digest"
+	"github.com/lee-woodridge/whats-that-card/prep"
 	"github.com/lee-woodridge/whats-that-card/server"
-
-	"fmt"
 )
 
 func main() {
@@ -13,5 +12,8 @@ func main() {
 		panic(err.Error())
 	}
 
-	server.StartServer(cards)
+	// Do pre-processing of the cards.
+	searchInfo := prep.CardInfoPrep(cards)
+
+	server.StartServer(searchInfo)
 }

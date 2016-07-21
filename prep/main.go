@@ -2,6 +2,7 @@ package prep
 
 import (
 	. "github.com/lee-woodridge/whats-that-card/card"
+	"github.com/lee-woodridge/whats-that-card/trie"
 )
 
 type CardInfo struct {
@@ -23,4 +24,14 @@ func CardInfoPrep(cards []Card) SearchInfo {
 	}
 	si.Trie = CreateCardTrie(si.CardInfos)
 	return si
+}
+
+func CreateCardTrie(cards []CardInfo) *trie.Trie {
+	t := trie.New()
+	for _, card := range cards {
+		for _, word := range card.AllStrings {
+			t.Add(word, card.RawCard)
+		}
+	}
+	return t
 }
