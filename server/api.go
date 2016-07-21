@@ -58,7 +58,7 @@ func search(cards prep.SearchInfo) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		res := cards.Trie.FuzzySearch(query.Search, 1)
+		res := cards.Trie.FuzzySearch(strings.ToLower(query.Search), 1)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(res)

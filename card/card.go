@@ -2,6 +2,7 @@ package card
 
 import (
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -71,8 +72,9 @@ func (c Card) GetAllStrings() []string {
 	for i := 0; i < v.NumField(); i++ {
 		switch s := v.Field(i).Interface().(type) {
 		case string:
-			split := strings.Split(s, " ")
-			allStrings = append(allStrings, split...)
+			s = strings.ToLower(s)
+			r := regexp.MustCompile("\\w+")
+			allStrings = append(allStrings, r.FindAllString(s, -1)...)
 		}
 	}
 	return allStrings
