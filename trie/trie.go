@@ -155,6 +155,7 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 	}
 
 	if currentRow[len(currentRow)-1] <= maxCost && n.hasInfo() {
+		// fmt.Printf("adding %s with score %d\n", string(append(prefix, n.r)), currentRow[len(currentRow)-1])
 		res[string(append(prefix, n.r))] = n.infos
 	}
 

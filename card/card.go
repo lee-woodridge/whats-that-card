@@ -1,11 +1,14 @@
 package card
 
 import (
-	"reflect"
-	"regexp"
 	"sort"
-	"strings"
 )
+
+// CardInfo used for holding relevant search information.
+type CardInfo struct {
+	RawCard *Card
+	Score   int
+}
 
 // CardSets is the format of the cards we get from the API.
 type CardSets map[string][]Card
@@ -35,7 +38,6 @@ type Card struct {
 	Type         string
 	Collectible  bool
 	Faction      string
-	InPlayText   string
 	Elite        bool
 	HowToGetGold string
 	CardSet      string
@@ -62,20 +64,4 @@ func (cs CardSets) AllCards() []Card {
 		}
 	}
 	return all
-}
-
-// GetAllStrings returns all of the strings from the card struct.
-// Uses reflection so will work even if the card struct changes.
-func (c Card) GetAllStrings() []string {
-	v := reflect.ValueOf(c)
-	allStrings := []string{}
-	for i := 0; i < v.NumField(); i++ {
-		switch s := v.Field(i).Interface().(type) {
-		case string:
-			s = strings.ToLower(s)
-			r := regexp.MustCompile("\\w+")
-			allStrings = append(allStrings, r.FindAllString(s, -1)...)
-		}
-	}
-	return allStrings
 }

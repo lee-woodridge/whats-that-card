@@ -13,7 +13,10 @@ func main() {
 	}
 
 	// Do pre-processing of the cards.
-	searchInfo := prep.CardInfoPrep(cards)
+	searchInfo, err := prep.CardInfoPrep(cards)
+	if err != nil {
+		panic(err)
+	}
 
 	server.StartServer(searchInfo)
 }

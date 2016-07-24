@@ -32,8 +32,8 @@ func StartServer(cards prep.SearchInfo) {
 func getCard(cards prep.SearchInfo) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cardId := strings.SplitN(r.URL.Path, "/", 3)[2]
-		for _, card := range cards.CardInfos {
-			if card.RawCard.CardId == cardId {
+		for _, card := range cards.Cards {
+			if card.CardId == cardId {
 				json.NewEncoder(w).Encode(card)
 				// w.Write([]byte(fmt.Sprintf("%#v", card)))
 				return
