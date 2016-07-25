@@ -120,9 +120,39 @@ func (t *Trie) FuzzySearch(word string, maxCost int) map[string][]interface{} {
 		currentRow[i] = i
 	}
 	for _, child := range t.root.children {
-		child.fuzzyRecursive([]rune(word), []rune(""), currentRow, res, maxCost)
+		child.fuzzyRecursive([]rune(word), []rune(""), currentRow, res, maxCost, true)
 	}
 	return res
+}
+
+// 2 length => normal prefix search
+// Assume minimum = 3 length prefix
+// Find any nodes in tree which are 1 edit away (don't need hasInfo())
+// prefix search for each of these, merge results.
+// TODO: need to score on how far away the prefixes are.
+func (t *Trie) FuzzyPrefixSearch(prefix string) []map[string][]interface{} {
+	potentialPrefixes := make(map[string][]interface{})
+	prefixRunes := []rune(prefix)
+	currentRow := make([]int, len(prefixRunes)+1)
+	for i, _ := range currentRow {
+		currentRow[i] = i
+	}
+	maxCost := 1
+	if len(prefixRunes) > 5 {
+		maxCost = 2
+	}
+	// Find potential paths which maxCost edits away from our prefix.
+	for _, child := range t.root.children {
+		child.fuzzyRecursive(prefixRunes, []rune(""), currentRow, potentialPrefixes, maxCost, false)
+	}
+	// Find prefix matches on these potential paths.
+	results := make([]map[string][]interface{}, len(potentialPrefixes))
+	i := 0
+	for k, _ := range potentialPrefixes {
+		results[i] = t.PrefixSearch(k)
+		i++
+	}
+	return results
 }
 
 // min is a basic min function for two ints, returning the smaller value.
@@ -137,7 +167,7 @@ func min(x, y int) int {
 // fuzzyRecursive is the recursive function used by FuzzySearch, for recursing
 // through the tree nodes. Accumulates the result in the res map.
 func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
-	res map[string][]interface{}, maxCost int) {
+	res map[string][]interface{}, maxCost int, needsInfo bool) {
 	columns := len(word) + 1
 	currentRow := []int{prevRow[0] + 1}
 	for i := 1; i < columns; i++ {
@@ -154,7 +184,7 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 		currentRow = append(currentRow, min(min(insertCost, deleteCost), replaceCost))
 	}
 
-	if currentRow[len(currentRow)-1] <= maxCost && n.hasInfo() {
+	if currentRow[len(currentRow)-1] <= maxCost && (needsInfo || n.hasInfo()) {
 		// fmt.Printf("adding %s with score %d\n", string(append(prefix, n.r)), currentRow[len(currentRow)-1])
 		res[string(append(prefix, n.r))] = n.infos
 	}
@@ -167,7 +197,7 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 	}
 	if min <= maxCost {
 		for _, child := range n.children {
-			child.fuzzyRecursive(word, append(prefix, n.r), currentRow, res, maxCost)
+			child.fuzzyRecursive(word, append(prefix, n.r), currentRow, res, maxCost, needsInfo)
 		}
 	}
 }
