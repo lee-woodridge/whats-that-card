@@ -58,9 +58,23 @@ func search(cards prep.SearchInfo) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		res := cards.Trie.FuzzySearch(strings.ToLower(query.Search), 1)
+		search := strings.ToLower(query.Search)
+		words := strings.Split(search, " ")
+		// Create storage for results.
+		results := make([]map[string][]interface{}, len(words))
+		// Split search terms into full words and incomplete final word.
+		full, prefix := words[:len(words)-1], words[len(words)-1]
+		// Do fuzzy search for each full word.
+		for i, word := range full {
+			results[i] = cards.Trie.FuzzySearch(word, 0)
+		}
+		// Do prefix search for incomplete word.
+		results[len(words)-1] = cards.Trie.PrefixSearch(prefix)
+
+		// Combine results.
+		combined := CombineResults(results)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		json.NewEncoder(w).Encode(res)
+		json.NewEncoder(w).Encode(combined)
 	}
 }
