@@ -26,6 +26,7 @@ type Node struct {
 	r        rune
 	parent   *Node
 	children map[rune]*Node
+	depth    int
 	infos    []interface{}
 }
 
@@ -55,12 +56,12 @@ func (t *Trie) Add(key string, info interface{}) {
 	// Iterate over the runes, we'll need to either get to the end
 	// if there is already this key, to insert our info, or we'll
 	// be creating new nodes all the way down.
-	for _, r := range runes {
+	for i, r := range runes {
 		if node, ok := curNode.children[r]; ok {
 			curNode = node
 		} else {
 			t.nodes++
-			curNode = curNode.addChild(r)
+			curNode = curNode.addChild(r, i+1)
 		}
 	}
 	curNode.addInfo(info)
@@ -184,7 +185,7 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 		currentRow = append(currentRow, min(min(insertCost, deleteCost), replaceCost))
 	}
 
-	if currentRow[len(currentRow)-1] <= maxCost && (needsInfo || n.hasInfo()) {
+	if currentRow[len(currentRow)-1] <= maxCost && (!needsInfo || n.hasInfo()) {
 		// fmt.Printf("adding %s with score %d\n", string(append(prefix, n.r)), currentRow[len(currentRow)-1])
 		res[string(append(prefix, n.r))] = n.infos
 	}
@@ -216,7 +217,7 @@ func (n *Node) collect(prefix string, res map[string][]interface{}) {
 
 // addChild adds a child node to node. It sets the childs parent to this node,
 // and adds the new node as a child.
-func (n *Node) addChild(r rune) *Node {
+func (n *Node) addChild(r rune, depth int) *Node {
 	// Probably unintended call to addChild.
 	if _, ok := n.children[r]; ok {
 		panic("Shouldn't add children when one exists.")
@@ -226,6 +227,7 @@ func (n *Node) addChild(r rune) *Node {
 		parent:   n,
 		children: make(map[rune]*Node),
 		infos:    []interface{}{},
+		depth:    depth,
 	}
 	n.children[r] = child
 	return child

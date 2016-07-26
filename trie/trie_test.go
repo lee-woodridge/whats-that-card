@@ -12,6 +12,9 @@ func TestSingleInsertion(t *testing.T) {
 	assert.Equal(t, 1, trie.keys)
 	assert.Equal(t, 4, trie.nodes)
 
+	assert.Equal(t, 1, trie.root.children[rune('t')].depth)
+	assert.Equal(t, 2, trie.root.children[rune('t')].children[rune('e')].depth)
+
 	node := trie.Find("test")
 	assert.NotNil(t, node)
 	assert.Equal(t, len(node.infos), 1)
