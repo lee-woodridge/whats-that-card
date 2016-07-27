@@ -62,7 +62,7 @@ func search(cards prep.SearchInfo) http.HandlerFunc {
 		words := strings.Split(search, " ")
 		fullLength := len(words) - 1
 		// Create storage for results.
-		results := make([]map[string][]interface{}, fullLength)
+		results := make([]map[string][]interface{}, fullLength+1)
 		// Split search terms into full words and incomplete final word.
 		full, prefix := words[:fullLength], words[fullLength]
 		// Do fuzzy search for each full word.
@@ -70,22 +70,10 @@ func search(cards prep.SearchInfo) http.HandlerFunc {
 			results[i] = cards.Trie.FuzzySearch(word, 0)
 		}
 		// Do prefix search for incomplete word.
-		fpr := cards.Trie.FuzzyPrefixSearch(prefix)
-		fmt.Printf("fpr: %#v\n", fpr)
-		// Add fpr results to full word results.
-		fullResults := make([]map[string][]interface{}, fullLength+len(fpr))
-		fmt.Printf("%d\n", fullLength+len(fpr))
-		for i, _ := range results {
-			fmt.Printf("BLAH\n")
-			fullResults[i] = results[i]
-		}
-		for i, _ := range fpr {
-			fmt.Printf("fullResults[%d] = %#v\n", fullLength+i, fpr[i])
-			fullResults[fullLength+i] = fpr[i]
-		}
+		results[fullLength] = cards.Trie.PrefixSearch(prefix)
 
 		// Combine results.
-		combined := CombineResults(fullResults)
+		combined := CombineResults(results)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(combined)
