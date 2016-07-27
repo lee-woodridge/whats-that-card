@@ -40,6 +40,9 @@ func CreateCardTrie(cards []Card) (*trie.Trie, error) {
 	// Create the trie.
 	t := trie.New()
 	for c, card := range cards {
+		if !card.Collectible {
+			continue
+		}
 		// Get the card structs info.
 		v := reflect.ValueOf(card)
 		// For each field, check the type is a string.

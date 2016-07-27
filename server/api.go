@@ -1,7 +1,7 @@
 package server
 
 import (
-	// . "github.com/lee-woodridge/whats-that-card/card"
+	. "github.com/lee-woodridge/whats-that-card/card"
 	"github.com/lee-woodridge/whats-that-card/prep"
 
 	"encoding/json"
@@ -46,6 +46,29 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 	}
 }
 
+type SearchQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}
+
+func sendResultJSON(res []CardInfo, w http.ResponseWriter,
+	searchCache *SearchCache, query *SearchQuery) {
+	searchCache.AddResult(query.Search, res)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// Slice result to get page we require.
+	if query.Page*query.PageSize > (len(res) - 1) {
+		http.Error(w, "Page size too high.", http.StatusBadRequest)
+		return
+	}
+	lastIndex := (query.Page * query.PageSize) + query.PageSize
+	if lastIndex > (len(res) - 1) {
+		lastIndex = len(res) - 1
+	}
+	res = res[query.Page*query.PageSize : lastIndex]
+	json.NewEncoder(w).Encode(res)
+}
+
 // search is the function which handles the /search endpoint.
 // Queries are json encoded, and assumed to have the form:
 // {
@@ -54,18 +77,18 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 // It returns a list of cards which match the search term, json encoded.
 func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var query struct {
-			Search string
-		}
-		if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+		query := &SearchQuery{}
+		if err := json.NewDecoder(r.Body).Decode(query); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
 		if res, ok := searchCache.GetResult(query.Search); ok {
-			fmt.Printf("Result found in cache.\n")
-			searchCache.AddResult(query.Search, res)
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			json.NewEncoder(w).Encode(res)
+			fmt.Printf("Result for %s found in cache.\n", query.Search)
+			cards, ok := res.([]CardInfo)
+			if !ok {
+				http.Error(w, "Cache result of unexpected type.", http.StatusExpectationFailed)
+			}
+			sendResultJSON(cards, w, searchCache, query)
 			return
 		}
 
@@ -86,9 +109,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		// Combine results.
 		combined := CombineResults(results)
 
-		fmt.Printf("Result calculated with Trie.\n")
-		searchCache.AddResult(query.Search, combined)
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		json.NewEncoder(w).Encode(combined)
+		fmt.Printf("Result for %s calculated with Trie.\n", query.Search)
+		sendResultJSON(combined, w, searchCache, query)
 	}
 }
