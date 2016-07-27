@@ -126,11 +126,8 @@ func (t *Trie) FuzzySearch(word string, maxCost int) map[string][]interface{} {
 	return res
 }
 
-// 2 length => normal prefix search
-// Assume minimum = 3 length prefix
-// Find any nodes in tree which are 1 edit away (don't need hasInfo())
-// prefix search for each of these, merge results.
-// TODO: need to score on how far away the prefixes are.
+// FuzzyPrefixSearch does a prefix search for all fuzzy paths found for our prefix,
+// with a Levenshtein distance of 1 for len(prefix) <= 5 and 2 for len(prefix) > 5.
 func (t *Trie) FuzzyPrefixSearch(prefix string) []map[string][]interface{} {
 	potentialPrefixes := make(map[string][]interface{})
 	prefixRunes := []rune(prefix)
@@ -153,6 +150,7 @@ func (t *Trie) FuzzyPrefixSearch(prefix string) []map[string][]interface{} {
 		results[i] = t.PrefixSearch(k)
 		i++
 	}
+	// TODO: need to score on how far away the prefixes are.
 	return results
 }
 
