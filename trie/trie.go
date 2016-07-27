@@ -205,6 +205,9 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 // Node functions.
 //
 
+// collect is used in the recursive calls in PrefixSearch.
+// It recursively collects children, adding them to the res map with the key
+// which is the string we've traversed to get here.
 func (n *Node) collect(prefix string, res map[string][]interface{}) {
 	res[prefix] = n.infos
 	for r, n := range n.children {

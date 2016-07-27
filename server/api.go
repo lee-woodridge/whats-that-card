@@ -21,8 +21,11 @@ func StartServer(cards prep.SearchInfo) {
 		port = "8080"
 	}
 
+	// Create cache for search.
+	searchCache := NewSearchCache()
+
 	http.HandleFunc("/card/", getCard(cards))
-	http.HandleFunc("/search", search(cards))
+	http.HandleFunc("/search", search(cards, searchCache))
 	fmt.Printf("Now serving on port: %s\n", port)
 	http.ListenAndServe(":"+port, nil)
 }
@@ -49,13 +52,21 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 // 		"search": "query string"
 // }
 // It returns a list of cards which match the search term, json encoded.
-func search(cards prep.SearchInfo) http.HandlerFunc {
+func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var query struct {
 			Search string
 		}
 		if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+
+		if res, ok := searchCache.GetResult(query.Search); ok {
+			fmt.Printf("Result found in cache.\n")
+			searchCache.AddResult(query.Search, res)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			json.NewEncoder(w).Encode(res)
+			return
 		}
 
 		search := strings.ToLower(query.Search)
@@ -75,6 +86,8 @@ func search(cards prep.SearchInfo) http.HandlerFunc {
 		// Combine results.
 		combined := CombineResults(results)
 
+		fmt.Printf("Result calculated with Trie.\n")
+		searchCache.AddResult(query.Search, combined)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(combined)
 	}
