@@ -13,7 +13,7 @@ import (
 
 // SearchQuery is a struct reflecting the JSON request we expect.
 type SearchQuery struct {
-	Search   string
+	Query    string
 	Page     int
 	PageSize int
 }
@@ -25,7 +25,7 @@ type SearchQuery struct {
 func StartServer(cards prep.SearchInfo) {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "4201"
 	}
 
 	// Create cache for search.
@@ -57,7 +57,8 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 // handled, such as caching, setting response headers, paging etc.
 func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache *SearchCache, query *SearchQuery) {
-	searchCache.AddResult(query.Search, res)
+	searchCache.AddResult(query.Query, res)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	// Slice result to get page we require.
 	if query.Page*query.PageSize > (len(res) - 1) {
@@ -87,8 +88,8 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		if res, ok := searchCache.GetResult(query.Search); ok {
-			fmt.Printf("Result for %s found in cache.\n", query.Search)
+		if res, ok := searchCache.GetResult(query.Query); ok {
+			fmt.Printf("Result for %s found in cache.\n", query.Query)
 			cards, ok := res.([]CardInfo)
 			if !ok {
 				http.Error(w, "Cache result of unexpected type.", http.StatusExpectationFailed)
@@ -97,7 +98,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 			return
 		}
 
-		search := strings.ToLower(query.Search)
+		search := strings.ToLower(query.Query)
 		words := strings.Split(search, " ")
 		fullLength := len(words) - 1
 		// Create storage for results.
@@ -114,7 +115,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		// Combine results.
 		combined := CombineResults(results)
 
-		fmt.Printf("Result for %s calculated with Trie.\n", query.Search)
+		fmt.Printf("Result for %s calculated with Trie.\n", query.Query)
 		sendResultJSON(combined, w, searchCache, query)
 	}
 }
