@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	elasticURL      = "http://search-whats-that-card-fja3htmk3m3ibexgzpdbd4kw7e.us-west-1.es.amazonaws.com/hs"
+	// elasticURL      = "http://search-whats-that-card-fja3htmk3m3ibexgzpdbd4kw7e.us-west-1.es.amazonaws.com/hs"
+	localElasticURL = "http://localhost:9200"
 	mappingFilename = "./mapping.json"
 )
 
@@ -21,7 +22,7 @@ func createCardsIndex() error {
 	client := &http.Client{}
 
 	// Delete if already exists.
-	req, err := http.NewRequest("DELETE", elasticURL, nil)
+	req, err := http.NewRequest("DELETE", localElasticURL, nil)
 	if err != nil {
 		return err
 	}
@@ -35,7 +36,7 @@ func createCardsIndex() error {
 		return e
 	}
 	buf := bytes.NewBuffer(file)
-	req, err = http.NewRequest("PUT", elasticURL, buf)
+	req, err = http.NewRequest("PUT", localElasticURL, buf)
 	if err != nil {
 		return err
 	}
@@ -51,7 +52,7 @@ func insertCardToElastic(client *http.Client, card Card) error {
 	}
 	buf := bytes.NewBuffer(b)
 	// Submit PUT to elastic using the cardId as unique key.
-	req, err := http.NewRequest("PUT", elasticURL+"/cards/"+card.CardId, buf)
+	req, err := http.NewRequest("PUT", localElasticURL+"/cards/"+card.CardId, buf)
 	if err != nil {
 		return err
 	}
@@ -60,7 +61,7 @@ func insertCardToElastic(client *http.Client, card Card) error {
 }
 
 // InsertCardsToElastic uploads the cards from the API into my ElasticSearch instance.
-func InsertCardsToElastic(cards map[string][]Card) error {
+func InsertCardsToElastic(cards Cards) error {
 	// Setup indexes to insert the cards first.
 	if err := createCardsIndex(); err != nil {
 		return err
@@ -69,12 +70,10 @@ func InsertCardsToElastic(cards map[string][]Card) error {
 	// Setup http client.
 	client := &http.Client{}
 
-	for _, val := range cards { // card set -> list of cards
-		for _, card := range val { // each card
-			err := insertCardToElastic(client, card)
-			if err != nil {
-				return err
-			}
+	for _, card := range cards {
+		err := insertCardToElastic(client, card)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

@@ -75,7 +75,9 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 // search is the function which handles the /search endpoint.
 // Queries are json encoded, and assumed to have the form:
 // {
-// 		"search": "query string"
+// 		"search": "query string",
+//		"page": 0, // indexed from 0 as first
+//		"pageSize": 9 // any size
 // }
 // It returns a list of cards which match the search term, json encoded.
 func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
