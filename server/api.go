@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+// SearchQuery is a struct reflecting the JSON request we expect.
+type SearchQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}
+
 // StartServer is the top level function for creating our card service.
 //
 // It pre-processes the card information such as setting up Tries for querying,
@@ -46,12 +53,8 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 	}
 }
 
-type SearchQuery struct {
-	Search   string
-	Page     int
-	PageSize int
-}
-
+// sendResultJSON makes sure everything about sending a result is correctly
+// handled, such as caching, setting response headers, paging etc.
 func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache *SearchCache, query *SearchQuery) {
 	searchCache.AddResult(query.Search, res)

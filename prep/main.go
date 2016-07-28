@@ -11,11 +11,13 @@ import (
 	"strings"
 )
 
+// SearchInfo is the struct which holds the card information for querying.
 type SearchInfo struct {
 	Cards []Card
 	Trie  *trie.Trie
 }
 
+// CardInfoPrep is the over-seer for all preparation of card metadata.
 func CardInfoPrep(cards []Card) (SearchInfo, error) {
 	si := SearchInfo{}
 	si.Cards = cards
@@ -27,6 +29,8 @@ func CardInfoPrep(cards []Card) (SearchInfo, error) {
 	return si, nil
 }
 
+// CreateCardTrie takes our list of cards and enters the relevant metadata
+// into a Trie along with scores for importance, for later searching.
 func CreateCardTrie(cards []Card) (*trie.Trie, error) {
 	// Read in the scoring json.
 	scoreFile, e := ioutil.ReadFile("./rankings.json")

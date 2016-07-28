@@ -8,6 +8,7 @@ const (
 	NUM_RESULTS = 1000
 )
 
+// SearchCache is the struct holding the cache information.
 type SearchCache struct {
 	// map from search term to result.
 	cache map[string]interface{}
@@ -25,7 +26,10 @@ func NewSearchCache() *SearchCache {
 	}
 }
 
-// Insert new result.
+// AddResult inserts a result into the cache.
+// It handles when the cache is full, where it evicts the oldest entry.
+// When a duplicate is passed to AddResult, it "refreshes" this entry,
+// so it is pushed to the back of the age queue.
 func (sc *SearchCache) AddResult(term string, res interface{}) {
 	// If we've maxed the cache, remove a result.
 	if len(sc.queue) >= sc.maxCount {
@@ -49,6 +53,8 @@ func (sc *SearchCache) AddResult(term string, res interface{}) {
 	sc.queue = append(sc.queue, term)
 }
 
+// GetResult fetches a result from the cache.
+// Returns the metadata (nil when not found) and a boolean reflecting success/failure.
 func (sc *SearchCache) GetResult(term string) (interface{}, bool) {
 	if val, ok := sc.cache[term]; ok {
 		return val, true
