@@ -3,6 +3,7 @@ package server
 import (
 	. "github.com/lee-woodridge/whats-that-card/card"
 	"github.com/lee-woodridge/whats-that-card/prep"
+	"github.com/lee-woodridge/whats-that-card/trie"
 
 	"encoding/json"
 	"fmt"
@@ -58,10 +59,10 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache *SearchCache, query *SearchQuery) {
 	searchCache.AddResult(query.Query, res)
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do without "*"?
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	// Slice result to get page we require.
-	if query.Page*query.PageSize > (len(res) - 1) {
+	if len(res) != 1 && query.Page*query.PageSize > (len(res)-1) {
 		http.Error(w, "Page size too high.", http.StatusBadRequest)
 		return
 	}
@@ -102,15 +103,46 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		words := strings.Split(search, " ")
 		fullLength := len(words) - 1
 		// Create storage for results.
-		results := make([]map[string][]interface{}, fullLength+1)
+		var results []map[string][]interface{}
 		// Split search terms into full words and incomplete final word.
-		full, prefix := words[:fullLength], words[fullLength]
-		// Do fuzzy search for each full word.
-		for i, word := range full {
-			results[i] = cards.Trie.FuzzySearch(word, 0)
+		var full []string
+		var prefix string
+		if len([]rune(words[fullLength])) > 4 {
+			results = make([]map[string][]interface{}, fullLength+2)
+			full, prefix = words, words[fullLength]
+		} else {
+			results = make([]map[string][]interface{}, fullLength+1)
+			full, prefix = words[:fullLength], words[fullLength]
 		}
+
 		// Do prefix search for incomplete word.
-		results[fullLength] = cards.Trie.PrefixSearch(prefix)
+		i := 0
+		if prefix != "" {
+			results[0] = cards.Trie.PrefixSearch(prefix)
+		}
+
+		// Define our error function, which will run on each returned node.
+		errorFunc := func(n *trie.Node, ld int) []interface{} {
+			infos := n.Info()
+			for i, info := range infos {
+				card, _ := info.(CardInfo)
+				// Reduce this card's score by 2*Levenschtein Distance.
+				card.Score -= 2 * ld
+				infos[i] = card
+			}
+			return infos
+		}
+		// Do fuzzy search for each full word.
+		for _, word := range full {
+			i++
+			errorMargin := 1
+			if len([]rune(word)) < 6 {
+				errorMargin = 1
+			} else {
+				errorMargin = 2
+			}
+			results[i] = cards.Trie.FuzzySearchFunc(word, errorMargin, errorFunc)
+		}
 
 		// Combine results.
 		combined := CombineResults(results)

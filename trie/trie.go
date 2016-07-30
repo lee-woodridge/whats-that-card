@@ -30,6 +30,9 @@ type Node struct {
 	infos    []interface{}
 }
 
+// Function for using the levenshtein distance to somehow edit the return values.
+type ErrorFunc func(n *Node, ld int) []interface{}
+
 //
 // Trie functions.
 //
@@ -112,47 +115,61 @@ func (t *Trie) PrefixSearch(prefix string) map[string][]interface{} {
 	return res
 }
 
-// FuzzySearch performs a search for any nodes which represent a word which has
+// FuzzySearchFunc performs a search for any nodes which represent a word which has
 // a Levenshtein distance less than maxCost.
-func (t *Trie) FuzzySearch(word string, maxCost int) map[string][]interface{} {
+// The third argument is a function with the signature:
+//     func(n *Node, ld int) []interface{}
+// which is run on any node before returning, where ld is it's Levenshtein Distance.
+// This allows modifying of nodes metadata before returning, based on it's relevance.
+func (t *Trie) FuzzySearchFunc(word string, maxCost int, whatToReturn ErrorFunc) map[string][]interface{} {
 	res := make(map[string][]interface{})
 	currentRow := make([]int, len(word)+1)
 	for i, _ := range currentRow {
 		currentRow[i] = i
 	}
 	for _, child := range t.root.children {
-		child.fuzzyRecursive([]rune(word), []rune(""), currentRow, res, maxCost, true)
+		child.fuzzyRecursive([]rune(word), []rune(""), currentRow, res, maxCost, true, whatToReturn)
 	}
 	return res
 }
 
-// FuzzyPrefixSearch does a prefix search for all fuzzy paths found for our prefix,
-// with a Levenshtein distance of 1 for len(prefix) <= 5 and 2 for len(prefix) > 5.
-func (t *Trie) FuzzyPrefixSearch(prefix string) []map[string][]interface{} {
-	potentialPrefixes := make(map[string][]interface{})
-	prefixRunes := []rune(prefix)
-	currentRow := make([]int, len(prefixRunes)+1)
-	for i, _ := range currentRow {
-		currentRow[i] = i
+// FuzzySearch performs a search for any nodes which represent a word which has
+// a Levenshtein distance less than maxCost.
+func (t *Trie) FuzzySearch(word string, maxCost int) map[string][]interface{} {
+	identity := func(n *Node, ld int) []interface{} {
+		return n.infos
 	}
-	maxCost := 1
-	if len(prefixRunes) > 5 {
-		maxCost = 2
-	}
-	// Find potential paths which maxCost edits away from our prefix.
-	for _, child := range t.root.children {
-		child.fuzzyRecursive(prefixRunes, []rune(""), currentRow, potentialPrefixes, maxCost, false)
-	}
-	// Find prefix matches on these potential paths.
-	results := make([]map[string][]interface{}, len(potentialPrefixes))
-	i := 0
-	for k, _ := range potentialPrefixes {
-		results[i] = t.PrefixSearch(k)
-		i++
-	}
-	// TODO: need to score on how far away the prefixes are.
-	return results
+	return t.FuzzySearchFunc(word, maxCost, identity)
 }
+
+// TODO: do I want this back?
+// // FuzzyPrefixSearch does a prefix search for all fuzzy paths found for our prefix,
+// // with a Levenshtein distance of 1 for len(prefix) <= 5 and 2 for len(prefix) > 5.
+// func (t *Trie) FuzzyPrefixSearch(prefix string) []map[string][]interface{} {
+// 	potentialPrefixes := make(map[string][]interface{})
+// 	prefixRunes := []rune(prefix)
+// 	currentRow := make([]int, len(prefixRunes)+1)
+// 	for i, _ := range currentRow {
+// 		currentRow[i] = i
+// 	}
+// 	maxCost := 1
+// 	if len(prefixRunes) > 5 {
+// 		maxCost = 2
+// 	}
+// 	// Find potential paths which maxCost edits away from our prefix.
+// 	for _, child := range t.root.children {
+// 		child.fuzzyRecursive(prefixRunes, []rune(""), currentRow, potentialPrefixes, maxCost, false)
+// 	}
+// 	// Find prefix matches on these potential paths.
+// 	results := make([]map[string][]interface{}, len(potentialPrefixes))
+// 	i := 0
+// 	for k, _ := range potentialPrefixes {
+// 		results[i] = t.PrefixSearch(k)
+// 		i++
+// 	}
+// 	// TODO: need to score on how far away the prefixes are.
+// 	return results
+// }
 
 // min is a basic min function for two ints, returning the smaller value.
 func min(x, y int) int {
@@ -166,7 +183,8 @@ func min(x, y int) int {
 // fuzzyRecursive is the recursive function used by FuzzySearch, for recursing
 // through the tree nodes. Accumulates the result in the res map.
 func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
-	res map[string][]interface{}, maxCost int, needsInfo bool) {
+	res map[string][]interface{}, maxCost int, needsInfo bool,
+	whatToReturn ErrorFunc) {
 	columns := len(word) + 1
 	currentRow := []int{prevRow[0] + 1}
 	for i := 1; i < columns; i++ {
@@ -185,7 +203,8 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 
 	if currentRow[len(currentRow)-1] <= maxCost && (!needsInfo || n.hasInfo()) {
 		// fmt.Printf("adding %s with score %d\n", string(append(prefix, n.r)), currentRow[len(currentRow)-1])
-		res[string(append(prefix, n.r))] = n.infos
+		levenshteinDistance := currentRow[len(currentRow)-1]
+		res[string(append(prefix, n.r))] = whatToReturn(n, levenshteinDistance)
 	}
 
 	min := currentRow[0]
@@ -196,7 +215,8 @@ func (n *Node) fuzzyRecursive(word, prefix []rune, prevRow []int,
 	}
 	if min <= maxCost {
 		for _, child := range n.children {
-			child.fuzzyRecursive(word, append(prefix, n.r), currentRow, res, maxCost, needsInfo)
+			child.fuzzyRecursive(word, append(prefix, n.r),
+				currentRow, res, maxCost, needsInfo, whatToReturn)
 		}
 	}
 }
@@ -238,6 +258,16 @@ func (n *Node) addChild(r rune, depth int) *Node {
 // as nodes which have info are nodes where a string terminated.
 func (n *Node) hasInfo() bool {
 	return len(n.infos) > 0
+}
+
+// Info returns the current nodes information.
+func (n *Node) Info() []interface{} {
+	return n.infos
+}
+
+// Depth returns the current nodes depth.
+func (n *Node) Depth() int {
+	return n.depth
 }
 
 // isLeaf returns whether the current node is a leaf or not, by checking if
