@@ -7,8 +7,9 @@ import (
 // CardInfo used for holding relevant search information.
 type CardInfo struct {
 	RawCard    *Card
-	Score      int
+	Score      float32
 	WordsFound []string
+	Seen       int
 }
 
 // CardSets is the format of the cards we get from the API.

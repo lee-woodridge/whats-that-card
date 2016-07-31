@@ -61,8 +61,12 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache.AddResult(query.Query, res)
 	w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do without "*"?
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if len(res) == 0 {
+		json.NewEncoder(w).Encode([]interface{}{}) // Return {}
+		return
+	}
 	// Slice result to get page we require.
-	if len(res) != 1 && query.Page*query.PageSize > (len(res)-1) {
+	if query.Page*query.PageSize > (len(res) - 1) {
 		http.Error(w, "Page size too high.", http.StatusBadRequest)
 		return
 	}
@@ -107,6 +111,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		// Split search terms into full words and incomplete final word.
 		var full []string
 		var prefix string
+		names := []string{}
 		if len([]rune(words[fullLength])) > 4 {
 			results = make([]map[string][]interface{}, fullLength+2)
 			full, prefix = words, words[fullLength]
@@ -119,6 +124,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		i := 0
 		if prefix != "" {
 			results[0] = cards.Trie.PrefixSearch(prefix)
+			names = append(names, prefix)
 		}
 
 		// Define our error function, which will run on each returned node.
@@ -126,8 +132,8 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 			infos := n.Info()
 			for i, info := range infos {
 				card, _ := info.(CardInfo)
-				// Reduce this card's score by 2*Levenschtein Distance.
-				card.Score -= 2 * ld
+				// Reduce this card's score by 25% per Levenschtein Distance.
+				card.Score *= pow(0.75, ld)
 				infos[i] = card
 			}
 			return infos
@@ -142,6 +148,7 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 				errorMargin = 2
 			}
 			results[i] = cards.Trie.FuzzySearchFunc(word, errorMargin, errorFunc)
+			names = append(names, word)
 		}
 
 		// Combine results.

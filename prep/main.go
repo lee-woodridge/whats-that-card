@@ -63,7 +63,7 @@ func CreateCardTrie(cards []Card) (*trie.Trie, error) {
 				r := regexp.MustCompile("\\w+")
 				for _, word := range r.FindAllString(s, -1) {
 					// Enter it into the trie, with the score associated with this field.
-					t.Add(word, CardInfo{RawCard: &cards[c], Score: thisScore, WordsFound: []string{word}})
+					t.Add(word, CardInfo{RawCard: &cards[c], Score: float32(thisScore), WordsFound: []string{word}})
 				}
 			}
 		}
