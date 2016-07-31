@@ -93,10 +93,24 @@ func CombineResults(in []map[string][]interface{}) []CardInfo {
 }
 
 func HighlightCards(cards []CardInfo) []CardInfo {
-	for cardIndex, card := range cards {
+	res := []CardInfo{}
+	for cardIndex, _ := range cards {
+		// Copy card (so that we don't edit cache values.)
+		card := CopyCardInfo(cards[cardIndex])
+		// Remove word found duplicates.
+		wfMap := make(map[string]struct{})
+		for _, val := range card.WordsFound {
+			wfMap[val] = struct{}{}
+		}
+		wf := make([]string, len(wfMap))
+		i := 0
+		for k, _ := range wfMap {
+			wf[i] = k
+			i++
+		}
 		// For each word found, look through the fields it could match
 		// with, then highlight those fields with HTML markup.
-		for _, word := range card.WordsFound {
+		for _, word := range wf {
 			// Get the card structs info.
 			v := reflect.ValueOf(*card.RawCard)
 			// For each field, check the type is a string.
@@ -112,7 +126,7 @@ func HighlightCards(cards []CardInfo) []CardInfo {
 						s = append(s[:after], append([]byte(HIGHLIGHT_CLOSE), s[after:]...)...)
 						// TODO: create snippet? (ie. ... here's where _I_ found it ...)
 						// Update card.
-						cards[cardIndex].Highlights = append(cards[cardIndex].Highlights, Highlight{
+						card.Highlights = append(card.Highlights, Highlight{
 							Field: v.Type().Field(i).Name,
 							Text:  string(s),
 						})
@@ -120,8 +134,9 @@ func HighlightCards(cards []CardInfo) []CardInfo {
 				}
 			}
 		}
+		res = append(res, card)
 	}
-	return cards
+	return res
 }
 
 // pow multiplies x by itself pow times.

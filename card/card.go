@@ -69,6 +69,22 @@ func NewCardInfo() CardInfo {
 	}
 }
 
+func CopyCardInfo(c CardInfo) CardInfo {
+	n := NewCardInfo()
+	n.WordsFound = make([]string, len(c.WordsFound))
+	for i, word := range c.WordsFound {
+		n.WordsFound[i] = word
+	}
+	n.Highlights = make([]Highlight, len(c.Highlights))
+	for i, highlight := range c.Highlights {
+		n.Highlights[i] = highlight
+	}
+	n.Score = c.Score
+	n.Seen = c.Seen
+	n.RawCard = c.RawCard
+	return n
+}
+
 // AllCards takes the map format we get from the API and returns a simple array
 // of all the cards. Sorts the keys to ensure we get deterministic loop ordering.
 func (cs CardSets) AllCards() []Card {
