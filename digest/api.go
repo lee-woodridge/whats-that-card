@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 const (
@@ -20,12 +21,11 @@ func GetCardsFromAPI() (Cards, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Get mashape api key from file (as not to check in to source control).
-	file, err := ioutil.ReadFile("./mashape.key")
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("X-Mashape-Key", string(file))
+	// Get mashape api key from env variable (as not to check in to source control).
+	// Can push env variable to heroku with:
+	//		heroku config:add MASHAPE_KEY="$MASHAPE_KEY"
+	mashapeKey := os.Getenv("MASHAPE_KEY")
+	req.Header.Set("X-Mashape-Key", mashapeKey)
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err

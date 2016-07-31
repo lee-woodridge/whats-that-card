@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	cards, err := digest.GetCardsFromFile("./cards.json")
+	cards, err := digest.GetCardsFromAPI()
 	if err != nil {
 		panic(err.Error())
 	}
