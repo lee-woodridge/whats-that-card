@@ -6,10 +6,18 @@ import (
 
 // CardInfo used for holding relevant search information.
 type CardInfo struct {
-	RawCard    *Card
-	Score      float32
-	WordsFound []string
-	Seen       int
+	RawCard    *Card       `json:"rawCard"`
+	Score      float32     `json:"score"`
+	WordsFound []string    `json:"wordsFound"`
+	Highlights []Highlight `json:"highlights"`
+	Seen       int         `json:"seen"`
+}
+
+// Hightlights are for returning information to the UI about
+// where we found particular search terms.
+type Highlight struct {
+	Field string `json:"field"` // name of the field we found the search term
+	Text  string `json:"text"`  // snippet surrounding the search term to show context
 }
 
 // CardSets is the format of the cards we get from the API.
@@ -19,35 +27,46 @@ type CardSets map[string][]Card
 type Cards []Card
 
 type Mechanic struct {
-	Name string
+	Name string `json:"name"`
 }
 
 // Card is the core struct of the card service. It holds all the information
 // for a specific card in the game.
 type Card struct {
-	Mechanics    []Mechanic // needs it's own type [{"name": "Charge"},{"name": "Divine Shield"}]
-	Durability   int
-	Locale       string
-	Text         string
-	HowToGet     string
-	ImgGold      string
-	Cost         int
-	Flavor       string
-	PlayerClass  string
-	Img          string
-	Attack       int
-	Health       int
-	Type         string
-	Collectible  bool
-	Faction      string
-	Elite        bool
-	HowToGetGold string
-	CardSet      string
-	Name         string
-	Artist       string
-	Rarity       string
-	Race         string
-	CardId       string
+	// needs it's own type [{"name": "Charge"},{"name": "Divine Shield"}]
+	Mechanics    []Mechanic `json:"mechanics"`
+	Durability   int        `json:"durability"`
+	Locale       string     `json:"locale"`
+	Text         string     `json:"text"`
+	HowToGet     string     `json:"howToGet"`
+	ImgGold      string     `json:"imgGold"`
+	Cost         int        `json:"cost"`
+	Flavor       string     `json:"flavor"`
+	PlayerClass  string     `json:"playerClass"`
+	Img          string     `json:"img"`
+	Attack       int        `json:"attack"`
+	Health       int        `json:"health"`
+	Type         string     `json:"type"`
+	Collectible  bool       `json:"collectible"`
+	Faction      string     `json:"faction"`
+	Elite        bool       `json:"elite"`
+	HowToGetGold string     `json:"howToGetGold"`
+	CardSet      string     `json:"cardSet"`
+	Name         string     `json:"name"`
+	Artist       string     `json:"artist"`
+	Rarity       string     `json:"rarity"`
+	Race         string     `json:"race"`
+	CardId       string     `json:"cardId"`
+}
+
+func NewCardInfo() CardInfo {
+	return CardInfo{
+		WordsFound: []string{},
+		Highlights: []Highlight{},
+		Score:      0,
+		Seen:       0,
+		RawCard:    nil,
+	}
 }
 
 // AllCards takes the map format we get from the API and returns a simple array

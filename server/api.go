@@ -58,7 +58,9 @@ func getCard(cards prep.SearchInfo) http.HandlerFunc {
 // handled, such as caching, setting response headers, paging etc.
 func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache *SearchCache, query *SearchQuery) {
+	// Add result to cache.
 	searchCache.AddResult(query.Query, res)
+	// Set headers (cors and json)
 	w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do without "*"?
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if len(res) == 0 {
@@ -75,6 +77,7 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 		lastIndex = len(res) - 1
 	}
 	res = res[query.Page*query.PageSize : lastIndex]
+	res = HighlightCards(res)
 	json.NewEncoder(w).Encode(res)
 }
 
@@ -83,7 +86,7 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 // {
 // 		"search": "query string",
 //		"page": 0, // indexed from 0 as first
-//		"pageSize": 9 // any size
+//		"pageSize": 12 // any size
 // }
 // It returns a list of cards which match the search term, json encoded.
 func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
