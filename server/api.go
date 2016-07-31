@@ -60,6 +60,7 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	searchCache *SearchCache, query *SearchQuery) {
 	// Add result to cache.
 	searchCache.AddResult(query.Query, res)
+	totalResults := len(res)
 	// Set headers (cors and json)
 	w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do without "*"?
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -78,7 +79,17 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	}
 	res = res[query.Page*query.PageSize : lastIndex]
 	res = HighlightCards(res)
-	json.NewEncoder(w).Encode(res)
+	// Add some metadata to the result for the UI.
+	output := struct {
+		Results []CardInfo `json:"results"`
+		Count   int        `json:"count"`
+		Total   int        `json:"total"`
+	}{
+		Results: res,
+		Count:   len(res),
+		Total:   totalResults,
+	}
+	json.NewEncoder(w).Encode(output)
 }
 
 // search is the function which handles the /search endpoint.
