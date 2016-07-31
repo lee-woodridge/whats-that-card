@@ -5,7 +5,7 @@ import (
 	"github.com/lee-woodridge/whats-that-card/upload"
 )
 
-func main() {
+func getCardsAndUpload() {
 	cards, err := digest.GetCardsFromFile("./cards.json")
 	if err != nil {
 		panic(err.Error())
