@@ -19,6 +19,12 @@ type SearchQuery struct {
 	PageSize int
 }
 
+type QueryResult struct {
+	Results []CardInfo `json:"results"`
+	Count   int        `json:"count"`
+	Total   int        `json:"total"`
+}
+
 // StartServer is the top level function for creating our card service.
 //
 // It pre-processes the card information such as setting up Tries for querying,
@@ -65,7 +71,11 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	w.Header().Set("Access-Control-Allow-Origin", "*") // TODO: do without "*"?
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if len(res) == 0 {
-		json.NewEncoder(w).Encode([]interface{}{}) // Return {}
+		json.NewEncoder(w).Encode(QueryResult{
+			Results: []CardInfo{},
+			Count:   0,
+			Total:   0,
+		})
 		return
 	}
 	// Slice result to get page we require.
@@ -80,11 +90,7 @@ func sendResultJSON(res []CardInfo, w http.ResponseWriter,
 	res = res[query.Page*query.PageSize : lastIndex]
 	res = HighlightCards(res)
 	// Add some metadata to the result for the UI.
-	output := struct {
-		Results []CardInfo `json:"results"`
-		Count   int        `json:"count"`
-		Total   int        `json:"total"`
-	}{
+	output := QueryResult{
 		Results: res,
 		Count:   len(res),
 		Total:   totalResults,
