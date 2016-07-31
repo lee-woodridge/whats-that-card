@@ -2,6 +2,7 @@ package server
 
 import (
 	. "github.com/lee-woodridge/whats-that-card/card"
+	"github.com/lee-woodridge/whats-that-card/digest"
 	"github.com/lee-woodridge/whats-that-card/prep"
 	"github.com/lee-woodridge/whats-that-card/trie"
 
@@ -171,4 +172,19 @@ func search(cards prep.SearchInfo, searchCache *SearchCache) http.HandlerFunc {
 		fmt.Printf("Result for %s calculated with Trie.\n", query.Query)
 		sendResultJSON(combined, w, searchCache, query)
 	}
+}
+
+func main() {
+	cards, err := digest.GetCardsFromAPI()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Do pre-processing of the cards.
+	searchInfo, err := prep.CardInfoPrep(cards)
+	if err != nil {
+		panic(err)
+	}
+
+	StartServer(searchInfo)
 }
