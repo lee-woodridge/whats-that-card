@@ -1,22 +1,36 @@
 package main
 
 import (
-	"github.com/lee-woodridge/whats-that-card/digest"
-	"github.com/lee-woodridge/whats-that-card/prep"
-	"github.com/lee-woodridge/whats-that-card/server"
+	"fmt"
+	"os"
+
+	"github.com/lee-woodridge/whats-that-card/fetch"
 )
 
 func main() {
-	cards, err := digest.GetCardsFromAPI()
-	if err != nil {
-		panic(err.Error())
+	if len(os.Args) < 2 {
+		os.Stderr.WriteString("argument required")
+		return
+	}
+	switch os.Args[1] {
+	case "fetch":
+		fetch.Fetch()
+		return
+	default:
+		fmt.Fprintf(os.Stderr, "%v is not a valid argument", os.Args[1])
+		return
 	}
 
-	// Do pre-processing of the cards.
-	searchInfo, err := prep.CardInfoPrep(cards)
-	if err != nil {
-		panic(err)
-	}
+	// cards, err := digest.GetCardsFromAPI()
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
 
-	server.StartServer(searchInfo)
+	// // Do pre-processing of the cards.
+	// searchInfo, err := prep.CardInfoPrep(cards)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// server.StartServer(searchInfo)
 }

@@ -3,9 +3,9 @@ Search terms to help you find that hearthstone card
 
 Run
 ```
-go run main.go
+go run main.go fetch
 ```
-to start the server.
+to fetch up to date card json.
 
 To set up key config for mashape, run:
 ```

@@ -23,9 +23,14 @@ _testmain.go
 *.test
 *.prof
 
-cards.json
-*.key
-
 # Godeps
 Godeps/Readme
 Godeps/_workspace
+
+# Project specific
+cards.json
+info.json
+rankings.json
+*.key
+debug
+.vscode
