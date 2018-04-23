@@ -49,12 +49,12 @@ func Fetch() {
 			return
 		}
 		if remoteInfo.Version == localInfo.Version {
-			fmt.Printf("Local cards up to date. Local version: %s, remove version: %s\n",
-				remoteInfo.Version, localInfo.Version)
+			fmt.Printf("Local cards up to date. Local version: %s, remote version: %s\n",
+				localInfo.Version, remoteInfo.Version)
 			return
 		}
-		fmt.Printf("Local cards not up to date. Local version: %s, remove version: %s\n",
-			remoteInfo.Version, localInfo.Version)
+		fmt.Printf("Local cards not up to date. Local version: %s, remote version: %s\n",
+			localInfo.Version, remoteInfo.Version)
 	} else {
 		fmt.Printf("No local cache found\n")
 	}

@@ -1,8 +1,6 @@
 package upload
 
 import (
-	. "github.com/lee-woodridge/whats-that-card/card"
-
 	"bytes"
 	"crypto/sha1"
 	"fmt"
@@ -15,12 +13,9 @@ const (
 	cloudinaryURL = "https://api.cloudinary.com/v1_1/elusive/image/upload"
 )
 
-// UploadImageToCloudinary takes a cards image link from the hearthstone API
+// ImageToCloudinary takes a cards image link from the hearthstone API
 // and creates a copy hosted on my cloudinary account.
-func UploadImageToCloudinary(card Card) error {
-	if card.Img == "" {
-		return nil
-	}
+func ImageToCloudinary(url, alias string) error {
 	unixTimestamp := time.Now().Unix()
 	privKeyFile, err := ioutil.ReadFile("./cloudinary.private.key")
 	if err != nil {
@@ -31,10 +26,10 @@ func UploadImageToCloudinary(card Card) error {
 		return err
 	}
 	shaStr := fmt.Sprintf("public_id=%s&timestamp=%d%s",
-		card.CardId, unixTimestamp, privKeyFile)
+		alias, unixTimestamp, privKeyFile)
 	shaVal := sha1.Sum([]byte(shaStr))
 	apiStr := fmt.Sprintf("file=%s&public_id=%s&timestamp=%d&api_key=%s&signature=%x",
-		card.Img, card.CardId, unixTimestamp, pubKeyFile, shaVal)
+		url, alias, unixTimestamp, pubKeyFile, shaVal)
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", cloudinaryURL, bytes.NewBufferString(apiStr))

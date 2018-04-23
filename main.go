@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/lee-woodridge/whats-that-card/fetch"
+	"github.com/lee-woodridge/whats-that-card/images"
 )
 
 func main() {
@@ -16,8 +17,11 @@ func main() {
 	case "fetch":
 		fetch.Fetch()
 		return
+	case "images":
+		images.GetImages()
+		return
 	default:
-		fmt.Fprintf(os.Stderr, "%v is not a valid argument", os.Args[1])
+		fmt.Fprintf(os.Stderr, "%s is not a valid argument", os.Args[1])
 		return
 	}
 

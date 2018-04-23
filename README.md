@@ -7,6 +7,12 @@ go run main.go fetch
 ```
 to fetch up to date card json.
 
+Run
+```
+go run main.go images
+```
+to fetch up to date card images, and publish them to cloudinary.
+
 To set up key config for mashape, run:
 ```
 heroku login
