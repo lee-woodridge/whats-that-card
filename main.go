@@ -6,6 +6,7 @@ import (
 
 	"github.com/lee-woodridge/whats-that-card/fetch"
 	"github.com/lee-woodridge/whats-that-card/images"
+	"github.com/lee-woodridge/whats-that-card/server2"
 )
 
 func main() {
@@ -19,6 +20,12 @@ func main() {
 		return
 	case "images":
 		images.GetImages()
+		return
+	case "server":
+		err := server2.Start()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%#v", err)
+		}
 		return
 	default:
 		fmt.Fprintf(os.Stderr, "%s is not a valid argument", os.Args[1])

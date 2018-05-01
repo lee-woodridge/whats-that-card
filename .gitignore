@@ -29,6 +29,7 @@ Godeps/_workspace
 
 # Project specific
 cards.json
+cards_full.json
 info.json
 rankings.json
 images.json
