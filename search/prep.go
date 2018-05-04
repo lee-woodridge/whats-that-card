@@ -2,11 +2,14 @@ package search
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/lee-woodridge/whats-that-card/card"
+
+	"github.com/surgebase/porter2"
 )
 
 var rankings = map[string]int{
@@ -69,8 +72,9 @@ var containsWords = map[string]bool{
 	"Armor":           false,
 }
 
-func collectWords(cards []card.Card) (map[string]map[string]struct{}, error) {
-	wordToCardsMap := make(map[string]map[string]struct{})
+// Map from word seen -> card id -> term frequency
+func calculateTermFrequency(cards []card.Card) (map[string]map[string]float64, error) {
+	wordToCardsMap := make(map[string]map[string]float64)
 	for _, thisCard := range cards {
 		// Get the card structs info.
 		v := reflect.ValueOf(thisCard)
@@ -83,13 +87,18 @@ func collectWords(cards []card.Card) (map[string]map[string]struct{}, error) {
 					continue
 				}
 				s = strings.ToLower(s)
+				// Split string into words
 				r := regexp.MustCompile("\\w+")
-				for _, word := range r.FindAllString(s, -1) {
+				wordList := r.FindAllString(s, -1)
+				// For each word, add it to the word map, and add the card to the set.
+				for _, word := range wordList {
+					// Stem the word.
+					word = porter2.Stem(word)
 					if m, found := wordToCardsMap[word]; found {
-						m[thisCard.CardID] = struct{}{}
+						m[thisCard.CardID] += (float64(1) / float64(len(wordList)))
 					} else {
-						wordToCardsMap[word] = make(map[string]struct{})
-						wordToCardsMap[word][thisCard.CardID] = struct{}{}
+						wordToCardsMap[word] = make(map[string]float64)
+						wordToCardsMap[word][thisCard.CardID] = (float64(1) / float64(len(wordList)))
 					}
 				}
 			}
@@ -98,13 +107,35 @@ func collectWords(cards []card.Card) (map[string]map[string]struct{}, error) {
 	return wordToCardsMap, nil
 }
 
+// word -> idf
+func calculateInverseDocumentFrequency(tf map[string]map[string]float64, numCards int) map[string]float64 {
+	numCardsFloat := float64(numCards)
+	idf := make(map[string]float64)
+	for word, cards := range tf {
+		idf[word] = math.Log(1 + (numCardsFloat / float64(len(cards))))
+	}
+	return idf
+}
+
+// Modifies the input tf to tf-idf
+// word -> card -> tf-idf
+func calculateTfIdf(tf map[string]map[string]float64, idf map[string]float64) {
+	for word, cards := range tf {
+		for card := range cards {
+			tf[word][card] *= idf[word]
+		}
+	}
+}
+
 func Prep(cards []card.Card) error {
-	val, err := collectWords(cards)
+	tf, err := calculateTermFrequency(cards)
 	if err != nil {
 		return err
 	}
-	for k, v := range val {
+	for k, v := range tf {
 		fmt.Printf("%s -> %s\n", k, v)
 	}
+	idf := calculateInverseDocumentFrequency(tf, len(cards))
+	calculateTfIdf(tf, idf)
 	return nil
 }
