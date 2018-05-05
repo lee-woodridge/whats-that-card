@@ -20,8 +20,8 @@ const (
 )
 
 type CardScore struct {
-	card  card.Card `json:"card"`
-	score float64   `json:"score"`
+	Card  card.Card `json:"card"`
+	Score float64   `json:"score"`
 }
 
 type CardScores []CardScore
@@ -35,7 +35,7 @@ func (cs CardScores) Swap(i, j int) {
 }
 
 func (cs CardScores) Less(i, j int) bool {
-	return cs[i].score < cs[j].score
+	return cs[i].Score < cs[j].Score
 }
 
 // Cosine Similarity (query, doc) = Dot product(query, doc) / ||doc|| * ||query||
@@ -66,8 +66,8 @@ func rankCards(queryTdIdfs map[string]float64, searchInfo *search.Info) CardScor
 	for card, dotProduct := range cardToDotProduct {
 		cardMagnitude := math.Sqrt(cardToMagnitude[card])
 		cardScores = append(cardScores, CardScore{
-			card:  searchInfo.CardMap[card],
-			score: cosineSimilarity(dotProduct, cardMagnitude, queryMagnitude)})
+			Card:  searchInfo.CardMap[card],
+			Score: cosineSimilarity(dotProduct, cardMagnitude, queryMagnitude)})
 	}
 	sort.Sort(cardScores)
 	return cardScores
@@ -90,8 +90,11 @@ func tdidfForQuery(query string, searchInfo *search.Info) map[string]float64 {
 func query(searchInfo *search.Info) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := strings.SplitN(r.URL.Path, "/", 3)[2]
+		fmt.Printf("query: %s\n", query)
 		queryTdIdf := tdidfForQuery(query, searchInfo)
+		fmt.Printf("query tdidf: %#v\n", queryTdIdf)
 		cardScores := rankCards(queryTdIdf, searchInfo)
+		fmt.Printf("card scores: %#v\n", cardScores)
 		json.NewEncoder(w).Encode(cardScores)
 		return
 	}
@@ -113,7 +116,7 @@ func StartServer() error {
 		return err
 	}
 
-	http.HandleFunc("/query", query(searchInfo))
+	http.HandleFunc("/query/", query(searchInfo))
 	fmt.Printf("Now serving on port: %s\n", port)
 	http.ListenAndServe(":"+port, nil)
 	return nil

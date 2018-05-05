@@ -22,7 +22,7 @@ func main() {
 		images.GetImages()
 		return
 	case "server":
-		err := server2.Start()
+		err := server2.StartServer()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%#v", err)
 		}
