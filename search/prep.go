@@ -72,6 +72,12 @@ var containsWords = map[string]bool{
 	"Armor":           false,
 }
 
+type Info struct {
+	Tfidf   map[string]map[string]float64
+	Idf     map[string]float64
+	CardMap map[string]card.Card
+}
+
 // Map from word seen -> card id -> term frequency
 func calculateTermFrequency(cards []card.Card) (map[string]map[string]float64, error) {
 	wordToCardsMap := make(map[string]map[string]float64)
@@ -112,6 +118,7 @@ func calculateInverseDocumentFrequency(tf map[string]map[string]float64, numCard
 	numCardsFloat := float64(numCards)
 	idf := make(map[string]float64)
 	for word, cards := range tf {
+		// smoothed idf (https://en.wikipedia.org/wiki/Tf%E2%80%93idf)
 		idf[word] = math.Log(1 + (numCardsFloat / float64(len(cards))))
 	}
 	return idf
@@ -127,15 +134,22 @@ func calculateTfIdf(tf map[string]map[string]float64, idf map[string]float64) {
 	}
 }
 
-func Prep(cards []card.Card) error {
+func Prep(cards []card.Card) (*Info, error) {
+	cardList := make(map[string]card.Card)
+	for _, card := range cards {
+		cardList[card.CardID] = card
+	}
 	tf, err := calculateTermFrequency(cards)
 	if err != nil {
-		return err
-	}
-	for k, v := range tf {
-		fmt.Printf("%s -> %s\n", k, v)
+		return nil, err
 	}
 	idf := calculateInverseDocumentFrequency(tf, len(cards))
 	calculateTfIdf(tf, idf)
-	return nil
+	for word, cards := range tf {
+		fmt.Printf("%s\n", word)
+		for card, tf := range cards {
+			fmt.Printf("\t%s %f\n", card, tf)
+		}
+	}
+	return &Info{tf, idf, cardList}, nil
 }
